@@ -1,0 +1,8 @@
+{
+  "name": "name-app",
+  "version": "0.1.0",
+  "dependencies": {
+    "jquery": "1.8",
+    "normalize-css": "normalize.css#~3.0.3"
+  }
+}
