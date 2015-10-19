@@ -1,78 +1,112 @@
 var gulp = require('gulp'),
-	wiredep = require('wiredep').stream,
-	browserSync = require('browser-sync').create(),
-	sass = require('gulp-sass'),
-	useref = require('gulp-useref'),
+    wiredep = require('wiredep').stream,
+    browserSync = require('browser-sync').create(),
+    autoprefixer = require('gulp-autoprefixer'),
+    sourcemaps = require('gulp-sourcemaps'),
+	imageop = require('gulp-image-optimization'),
+    cache = require('gulp-cache'),
+    runSequence = require('run-sequence'),
+    sass = require('gulp-sass'),
+    useref = require('gulp-useref'),
     gulpif = require('gulp-if'),
     uglify = require('gulp-uglify'),
     minifyCss = require('gulp-minify-css'),
     clean = require('gulp-clean');
 
-//Browser-sync
-// Static server
-gulp.task('browser-sync', function() {
+//Browser-sync server
+gulp.task('browserSync', function() {
     browserSync.init({
         server: {
-            baseDir: "./dist"
+            baseDir: "app"
         }
     });
 });
 
-//Clean 
-gulp.task('clean', function () {
-    return gulp.src('dist', {read: false})
-        .pipe(clean());
-});
-
-//Build 
-gulp.task('build', ['clean'], function () {
-    var assets = useref.assets();
- 
-    return gulp.src('app/*.html')
-        .pipe(assets)
-        .pipe(gulpif('*.js', uglify()))
-        .pipe(gulpif('*.css', minifyCss()))
-        .pipe(assets.restore())
-        .pipe(useref())
-        .pipe(gulp.dest('dist'))
-        .pipe(browserSync.stream());
-});
-
 //Sass 
 gulp.task('sass', function () {
-  gulp.src('app/sass/**/*.scss')
+  gulp.src('app/sass/*.scss')
+	.pipe(sourcemaps.init())
     .pipe(sass().on('error', sass.logError))
-    .pipe(gulp.dest('app/css'));
-});
-
-//Images
-gulp.task('images',['build'], function (){
-	gulp.src('app/img/*')
-		.pipe(gulp.dest('./dist/img'));
-});
-
-//Fonts
-gulp.task('fonts',['build'], function (){
-	gulp.src('app/fonts/**/*')
-		.pipe(gulp.dest('./dist/fonts'));
+	.pipe(autoprefixer({
+      browsers: ['last 2 versions']
+      }))
+	.pipe(sourcemaps.write())
+    .pipe(gulp.dest('app/css'))
+    .pipe(browserSync.stream());
 });
 
 //Bower
 gulp.task('bower', function () {
-  gulp.src('./app/index.html')
+  gulp.src('app/index.html')
     .pipe(wiredep({
       directory : "app/bower_components"
     }))
-    .pipe(gulp.dest('./app'));
+    .pipe(gulp.dest('app'));
 });
 
-//Watch
-gulp.task('watch', function () {
-	gulp.watch('bower.json', ['bower', 'build']);
-	gulp.watch('app/sass/**/*.scss', ['sass', 'build']);
-	gulp.watch('app/*.html', ['build']);
-	gulp.watch('app/js/*.js', ['build']);
+// Watchers
+gulp.task('watch', function() {
+  gulp.watch('bower,json', ['bower']);
+  gulp.watch('app/sass/*.scss', ['sass']).on('change', browserSync.reload);
+  gulp.watch('app/*.html').on('change', browserSync.reload); 
+  gulp.watch('app/js/**/*.js').on('change', browserSync.reload);
 });
 
-//Default task
-gulp.task('default', ['sass', 'bower', 'build', 'images', 'fonts', 'browser-sync', 'watch']);
+// Optimization
+//-------------
+
+//CSS and JavaScript 
+gulp.task('useref', function() {
+  var assets = useref.assets();
+
+  return gulp.src('app/*.html')
+    .pipe(assets)
+    .pipe(gulpif('*.css', minifyCss()))
+    .pipe(gulpif('*.js', uglify()))
+    .pipe(assets.restore())
+    .pipe(useref())
+    .pipe(gulp.dest('dist'))
+});
+
+//Images 
+gulp.task('images', function(cb) {
+    gulp.src(['app/images/**/*.png','app/images/**/*.jpg','app/images/**/*.gif','app/images/**/*.jpeg']).pipe(cache(imageop({
+        optimizationLevel: 5,
+        progressive: true,
+        interlaced: true
+    }))).pipe(gulp.dest('dist/images')).on('end', cb).on('error', cb);
+});
+
+// Copying fonts 
+gulp.task('fonts', function() {
+    return gulp.src('app/fonts/**/*')
+    .pipe(gulp.dest('dist/fonts'))
+});
+
+//Clean 
+gulp.task('clean', function (callback) {
+        gulp.src('dist', {read: false})
+        .pipe(clean());
+    return cache.clearAll(callback);
+});
+
+gulp.task('clean:dist', function(callback) {
+    gulp.src(['dist/**/*', '!dist/images', '!dist/images/**/*'], callback)
+    .pipe(clean());
+});
+
+// Build
+// ---------------
+
+gulp.task('default', function(callback) {
+  runSequence(['sass', 'bower', 'browserSync', 'watch'],
+    callback
+  )
+});
+
+gulp.task('build', function(callback) {
+  runSequence('clean:dist', 
+    ['sass', 'useref', 'images', 'fonts'],
+    callback
+  )
+});
