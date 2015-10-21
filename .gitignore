@@ -1,5 +1,5 @@
 node_modules
 app/bower_components
 app/css
-app/index.html
 dist
+*.html
