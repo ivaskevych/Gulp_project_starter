@@ -1,0 +1,25 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='UTF-8')
+    title Document
+    // build:css css/vendor.css
+    // bower:css
+    // endbower
+    // endbuild
+    // build:css css/main.css
+    link(rel='stylesheet' href='css/main.css')
+    // endbuild
+  body
+    .container
+      .row
+        .col-xs-12
+          h1 Hello world!
+    // build:js scripts/vendor.js
+    // bower:js
+    script(src='bower_components/jquery/jquery.js')
+    // endbower
+    // endbuild
+    // build:js scripts/main.js
+    script(src='scripts/main.js')
+    // endbuild

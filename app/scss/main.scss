@@ -1,6 +1,6 @@
-@import 'colors';
-@import 'fonts';
-@import 'grid';
+@import 'includes/fonts';
+@import 'includes/colors';
+@import 'includes/grid';
 
 body {
 	background: $bg-color;
