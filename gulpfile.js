@@ -105,7 +105,7 @@ gulp.task('clean', function (callback) {
 });
 
 gulp.task('clean:dist', function(callback) {
-  gulp.src(['dist/**/*', '!dist/images', '!dist/images/**/*'], callback)
+  gulp.src(['dist/*', '!dist/images', '!dist/images/**/*'], callback)
   .pipe(clean());
 });
 
