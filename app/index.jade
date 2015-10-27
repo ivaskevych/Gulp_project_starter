@@ -3,6 +3,7 @@ html(lang='en')
   head
     meta(charset='UTF-8')
     title Document
+    meta(name="viewport" content="width=device-width, initial-scale=1")
     // build:css css/vendor.css
     // bower:css
     // endbower
@@ -13,10 +14,10 @@ html(lang='en')
   body
     .container
       .row
-        .col-xs-12
-          h1 Hello world!
+        h1 Hello world!
     // build:js scripts/vendor.js
     // bower:js
+    script(src='bower_components/jquery/jquery.js')
     // endbower
     // endbuild
     // build:js scripts/main.js

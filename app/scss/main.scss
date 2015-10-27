@@ -1,4 +1,10 @@
-@import 'includes/fonts';
-@import 'includes/colors';
-@import 'includes/grid';
+// Variables and mixins
+@import "settings";
+@import "mixins";
 
+// Components
+@import "components/normalize";
+@import "components/layout";
+@import "components/typography";
+@import "components/buttons";
+@import "components/code";
